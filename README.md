@@ -1,5 +1,5 @@
 # Description
-- .Net 6 WPF app using msft webView2 to host web apps like Google Chat, Google Voice and WhatsApp so i can do handy UX stuff like ESC to minimize.
+.Net 6 WPF app using msft webView2 to host web apps like Google Chat, Google Voice and WhatsApp so i can do handy UX stuff like ESC to minimize.
 
 ## Motivations
 - shifting away from Notification Tray icons to having everything on taskbar (Windows 11 influence)
