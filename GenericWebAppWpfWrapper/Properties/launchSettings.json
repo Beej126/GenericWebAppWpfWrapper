@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "GenericWebAppWpfWrapper": {
+      "commandName": "Project",
+      "commandLineArgs": "https://chat.google.com GoogleChat",
+      "workingDirectory": "C:\\save\\repos\\Personal\\GenericWebAppWpfWrapper"
+    }
+  }
+}
