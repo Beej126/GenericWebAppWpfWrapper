@@ -19,7 +19,8 @@ namespace GenericWebAppWpfWrapper
         public MainWindow(IConfiguration config)
         {
             this.config = config;
-            this.Icon = new BitmapImage(new Uri(config["IconPath"]));
+            this.Icon = new BitmapImage(new Uri(Path.Combine(Directory.GetCurrentDirectory(), config["AppName"].Replace(" ", "") + ".ico")));
+            this.Title = config["AppName"];
 
             InitializeComponent();
 
@@ -96,7 +97,7 @@ namespace GenericWebAppWpfWrapper
                 //https://www.fatalerrors.org/a/excerpt-interaction-between-webview2-and-js.html
 
                 //AddScriptToExecuteOnDocumentCreatedAsync fires on frames as well which gives us full power to override spammity spam vs just the main page
-                wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(config["PageScript"]);
+                wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), config["AppName"].Replace(" ", "") + ".js")));
                 /*$@"
                 let previousMessageCount = 0;
                 setInterval(()=>{{

@@ -52,8 +52,7 @@ namespace GenericWebAppWpfWrapper
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     { "Url", e.Args[0] },
-                    { "IconPath", Path.Combine(Directory.GetCurrentDirectory(), e.Args[1]+".ico") },
-                    { "PageScript", File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), e.Args[1]+".js")) },
+                    { "AppName", e.Args[1] }
                 })
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
