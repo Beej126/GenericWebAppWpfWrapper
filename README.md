@@ -1,6 +1,9 @@
 # Description
 .Net 6 WPF app using msft webView2 to host web apps like Google Chat, Google Voice and WhatsApp so i can do handy UX stuff like ESC to minimize.
 
+![image](https://user-images.githubusercontent.com/6301228/164066607-777a8b53-3c32-4214-b294-fb62047a2195.png)
+
+
 ## Motivations
 - shifting away from Notification Tray icons to having everything on Taskbar (Windows 11 influence)
 - the windows apps provided by the respective vendors don't do the few "good citizen" UX i'm looking for, e.g. ESC to minimize, no tray icon, message count indicator on taskbar icon
