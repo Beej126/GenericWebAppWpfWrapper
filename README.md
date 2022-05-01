@@ -5,15 +5,18 @@
 
 
 ## Motivations
-- shifting away from Notification Tray icons to having everything on Taskbar (Windows 11 influence)
-- the windows apps provided by the respective vendors don't do the few "good citizen" UX i'm looking for, e.g. ESC to minimize, no tray icon, message count indicator on taskbar icon
+there's a few "good citizen" user experiences i'm looking for that don't come with the corresponding apps or web pages out of the box:
+- ESC to minimize
+- Standard window close button overridden to minimize
+- no tray icon - shifting away from Notification Tray icons to having everything on Taskbar (Windows 11 influence)
+- message count indicator on Taskbar icon
 
 ## Usage
-- there are no binary releases... you'll have to build the exe yourself... let me know if there's interest and i'll take the time to create the CI/CD github action script
+- you'll have to build exe yourself for now... let me know if there's interest and i'll take the time to create the CI/CD github action script
 - once you have the exe, the idea is to create a shortcut to it with two parameters (see blahLnk.lnk example in this repo):
   1. the url of the web app
   2. the filename prefix for (blah.ico and blah.js)
-  - and set the "Start in:" of the shortcut to the directory those ico and js files are in
+- and lastly set the "Start in:" directory of the shortcut to the path of its ico & js files
 
 ## Notes
 - since this does a window minimize on close button, there's an additional button in the title bar to truly quit the app<br/>
