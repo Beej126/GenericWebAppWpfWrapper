@@ -1,5 +1,5 @@
 # Description
-.Net 6 WPF app using msft webView2 to host web apps like Google Chat, Google Voice and WhatsApp so i can fine tune my preferred desktop UX. e.g. ESC key for minimize to taskbar.
+.Net 6 WPF app using msft webView2 to host web apps like Google Chat, Google Voice and WhatsApp so i can fine tune my preferred desktop UX.
 
 ![image](https://user-images.githubusercontent.com/6301228/164066607-777a8b53-3c32-4214-b294-fb62047a2195.png)
 
