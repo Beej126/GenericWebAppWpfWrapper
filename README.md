@@ -10,9 +10,10 @@
 
 ## Usage
 - there are no binary releases... you'll have to build the exe yourself... let me know if there's interest and i'll take the time to create the CI/CD github action script
-- once you have the exe, the idea is to create a shortcut to it with two parameters (see blahLnk.lnk example in this repo):
+- once you have the exe, the idea is to create a shortcut to it with 2 required & 1 last optional parameters (see blahLnk.lnk example in this repo):
   1. the url of the web app
   2. the filename prefix for (blah.ico and blah.js)
+  3. True - if you want this instance to NOT share application storage, cookies, etc.
   - and set the "Start in:" of the shortcut to the directory those ico and js files are in
 
 ## Notes

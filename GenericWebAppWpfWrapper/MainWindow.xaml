@@ -9,6 +9,7 @@
         Height="550" Width="850"
         Background="White"
         Closing="Window_Closing"
+        StateChanged="Window_StateChanged"
 >
   <!-- put button in title bar area...
     slightly older example but good baseline for wanting to add button 
@@ -33,7 +34,7 @@
                 <ContentPresenter Content="{TemplateBinding Content}" />
               </Border>
               <!-- fouth button! -->
-              <Button Foreground="White" x:Name="btnQuit" Focusable="False" Height="25" HorizontalAlignment="Right" Margin="0,1,150,0" VerticalAlignment="Top" Width="50" WindowChrome.IsHitTestVisibleInChrome="True" Background="Transparent" BorderThickness="0">Q</Button>
+              <Button Foreground="Gray" x:Name="btnQuit" Focusable="False" Height="25" HorizontalAlignment="Right" Margin="0,1,150,0" VerticalAlignment="Top" Width="50" WindowChrome.IsHitTestVisibleInChrome="True" Background="Transparent" BorderThickness="0">Q</Button>
             </Grid>
           </ControlTemplate>
         </Setter.Value>
@@ -67,6 +68,6 @@
   </Window.Resources>
 
   <DockPanel Margin="0,0,0,0">
-        <wv2:WebView2 Name="wv2" Source="edge://version/" WebMessageReceived="Wv2_WebMessageReceived" Initialized="webView_Initialized" />
-  </DockPanel>
+        <wv2:WebView2 Name="wv2" WebMessageReceived="Wv2_WebMessageReceived" Initialized="webView_Initialized" />
+    </DockPanel>
 </Window>

@@ -5,11 +5,38 @@ VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericWebAppWpfWrapper", "GenericWebAppWpfWrapper\GenericWebAppWpfWrapper.csproj", "{BAE4906B-99A1-4C3B-AB8D-3105823B3C01}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PageScripts", "PageScripts", "{190F0CDF-3078-4E8D-A1EB-13F46FCBCF3F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Message Count Scrape Scripts", "Message Count Scrape Scripts", "{190F0CDF-3078-4E8D-A1EB-13F46FCBCF3F}"
 	ProjectSection(SolutionItems) = preProject
+		Gmail.js = Gmail.js
 		GoogleChat.js = GoogleChat.js
 		GoogleVoice.js = GoogleVoice.js
+		MSTeams.js = MSTeams.js
 		WhatsApp.js = WhatsApp.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Icons", "Icons", "{4E68851C-7B73-4D23-9518-BBCF836D3D05}"
+	ProjectSection(SolutionItems) = preProject
+		Gmail.ico = Gmail.ico
+		Gmail.png = Gmail.png
+		GoogleChat.ico = GoogleChat.ico
+		GoogleVoice.ico = GoogleVoice.ico
+		GoogleVoice.png = GoogleVoice.png
+		MSTeams.ico = MSTeams.ico
+		WhatsApp.ico = WhatsApp.ico
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shortcut Examples", "Shortcut Examples", "{760A9D02-3873-49F4-AEF5-3E910B757DD7}"
+	ProjectSection(SolutionItems) = preProject
+		Gmail.lnk = Gmail.lnk
+		GoogleChat.lnk = GoogleChat.lnk
+		GoogleVoice.lnk = GoogleVoice.lnk
+		MSTeams.lnk = MSTeams.lnk
+		WhatsApp.lnk = WhatsApp.lnk
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{DFC1801D-F28A-4192-847E-379D24246310}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

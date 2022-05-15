@@ -51,8 +51,9 @@ namespace GenericWebAppWpfWrapper
                 .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
-                    { "Url", e.Args[0] },
-                    { "AppName", e.Args[1] }
+                    { "Url", getArg(e.Args, 0) },
+                    { "AppName", getArg(e.Args, 1) },
+                    { "SeparateUserData", getArg(e.Args, 2) }
                 })
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
@@ -65,5 +66,7 @@ namespace GenericWebAppWpfWrapper
 
             (new MainWindow(configuration)).Show();
         }
+        private string getArg(string[] args, int index) => args.Length > index ? args[index] : null;
     }
+
 }
