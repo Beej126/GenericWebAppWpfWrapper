@@ -84,9 +84,16 @@ namespace GenericWebAppWpfWrapper
         private string savedUserAgent;
         private void webView_Initialized(object wvInitSender, System.EventArgs e)
         {
-
             wv2.CoreWebView2InitializationCompleted += (object sender, CoreWebView2InitializationCompletedEventArgs e) =>
             {
+
+                //https://stackoverflow.com/questions/57479245/how-to-add-support-for-html5-notifications-in-xaml-webview-in-a-uwp-app/57503529#57503529
+                wv2.CoreWebView2.PermissionRequested += (object sender, CoreWebView2PermissionRequestedEventArgs e) =>
+                {
+                    //MessageBox.Show("wv2.CoreWebView2.PermissionRequested\r\n\r\nPermissionKind: " + e.PermissionKind + "\r\n\r\nUri: " + e.Uri);
+                    e.State = CoreWebView2PermissionState.Allow;
+                };
+
                 wv2.CoreWebView2.NavigationStarting += (object sender, CoreWebView2NavigationStartingEventArgs e) =>
                 {
                     //see massive thread on the need for user agent string with google auth: https://github.com/MicrosoftEdge/WebView2Feedback/issues/1647#issuecomment-1063861835
@@ -113,6 +120,27 @@ namespace GenericWebAppWpfWrapper
                         //newWindowArgs.NewWindow = wv2.CoreWebView2; //this worked for voice.google.com but crashed for mail.google.com
                         newWindowArgs.Handled = true;
                         wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
+                    }
+
+                    //otherwise launch external links out to OS's default browser to get the best experience with cached logins and extensions, versus trapped in the self contained web view
+                    else
+                    {
+                        newWindowArgs.Handled = true;
+
+                        // some unexpected finesse required to get down to clean urls, especially when clicking links in gmail...
+                        // they would be first wrapped in a google.com redirect 
+                        // and then many corporate emails will also wrap their urls in a tracking redirect as well
+                        // so i'm skipping to the last "http" i can find in the url string... hopefully that works for all cases
+                        // and then double-urldecoding it to unwrap those redirect embeds
+                        // also, while i'm here recording interesting bits of real life... somehow i guess the google.com wrapper urls would fire through launching the android subsystem for windows on my machine before the browser would launch???... very odd, not sure what to rack that up to, but cleaning the urls seemed to get rid of that as well
+                        var url = System.Web.HttpUtility.UrlDecode(System.Web.HttpUtility.UrlDecode(newWindowArgs.Uri.Substring(newWindowArgs.Uri.LastIndexOf("http"))));
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo {
+                                FileName = url,
+                                Verb = "open",
+                                UseShellExecute = true
+                            }
+                        );
                     }
 
                     //////////////////////////////////////////////////////////////////////////////

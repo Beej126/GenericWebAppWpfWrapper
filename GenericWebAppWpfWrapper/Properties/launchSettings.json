@@ -2,8 +2,8 @@
   "profiles": {
     "GenericWebAppWpfWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "https://voice.google.com \"Google Voice\" True",
-      "workingDirectory": "C:\\save\\repos\\Personal\\GenericWebAppWpfWrapper"
+      "commandLineArgs": "https://mail.google.com \"Gmail\"",
+      "workingDirectory": "C:\\save\\repos\\GenericWebAppWpfWrapper"
     }
   }
 }
