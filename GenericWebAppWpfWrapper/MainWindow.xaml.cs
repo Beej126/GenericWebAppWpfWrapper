@@ -2,6 +2,8 @@
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
+using System.Linq;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -128,12 +130,16 @@ namespace GenericWebAppWpfWrapper
                         newWindowArgs.Handled = true;
 
                         // some unexpected finesse required to get down to clean urls, especially when clicking links in gmail...
-                        // they would be first wrapped in a google.com redirect 
-                        // and then many corporate emails will also wrap their urls in a tracking redirect as well
-                        // so i'm skipping to the last "http" i can find in the url string... hopefully that works for all cases
-                        // and then double-urldecoding it to unwrap those redirect embeds
-                        // also, while i'm here recording interesting bits of real life... somehow i guess the google.com wrapper urls would fire through launching the android subsystem for windows on my machine before the browser would launch???... very odd, not sure what to rack that up to, but cleaning the urls seemed to get rid of that as well
-                        var url = System.Web.HttpUtility.UrlDecode(System.Web.HttpUtility.UrlDecode(newWindowArgs.Uri.Substring(newWindowArgs.Uri.LastIndexOf("http"))));
+                        // gmail embeds what is probably a tracking wrapper around all urls so strip that off before launching because somehow it triggered launching android subsystem for windows on my machine?!?!
+                        var url = newWindowArgs.Uri;
+                        var match = System.Text.RegularExpressions.Regex.Match(url, @"https:\/\/www\.google\.com\/url\?(.*?)(q|url)=(.*?)&", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        if (match.Success) { url = match.Groups[3].Value; }
+
+                        // if we see the long urlencoded value for "/" or short form of encoded ":/" then we know to urldecode... hopefully that's a reliable way to catch all cases???
+                        if (url.ToUpper().Contains("%252F") || url.ToUpper().Contains("%3A%2F")) url = System.Web.HttpUtility.UrlDecode(url);
+
+                        txtMessage.Text = "launching url: " + url;
+
                         System.Diagnostics.Process.Start(
                             new System.Diagnostics.ProcessStartInfo {
                                 FileName = url,

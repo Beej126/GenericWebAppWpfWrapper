@@ -2,7 +2,7 @@
   "profiles": {
     "GenericWebAppWpfWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "https://mail.google.com \"Gmail\"",
+      "commandLineArgs": "https://chat.google.com \"Google Chat\"",
       "workingDirectory": "C:\\save\\repos\\GenericWebAppWpfWrapper"
     }
   }
