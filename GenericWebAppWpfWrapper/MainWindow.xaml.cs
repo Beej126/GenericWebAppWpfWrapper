@@ -135,8 +135,8 @@ namespace GenericWebAppWpfWrapper
                         var match = System.Text.RegularExpressions.Regex.Match(url, @"https:\/\/www\.google\.com\/url\?(.*?)(q|url)=(.*?)&", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                         if (match.Success) { url = match.Groups[3].Value; }
 
-                        // if we see the long urlencoded value for "/" or short form of encoded ":/" then we know to urldecode... hopefully that's a reliable way to catch all cases???
-                        if (url.ToUpper().Contains("%252F") || url.ToUpper().Contains("%3A%2F")) url = System.Web.HttpUtility.UrlDecode(url);
+                        //hopefully doing this all the time doesn't have negative side effects??
+                        url = System.Web.HttpUtility.UrlDecode(url);
 
                         txtMessage.Text = "launching url: " + url;
 
