@@ -53,18 +53,23 @@ namespace GenericWebAppWpfWrapper
                 {
                     { "Url", getArg(e.Args, 0) },
                     { "AppName", getArg(e.Args, 1) },
-                    { "SeparateUserData", getArg(e.Args, 2) }
+                    { "SeparateUserData", getArg(e.Args, 2) },
+                    { "BlockExternalLinks", getArg(e.Args, 3) },
+                    { "OnlyAllowScripts", getArg(e.Args, 4) }
                 })
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            //var services = new ServiceCollection();
+            var services = new ServiceCollection();
 
-            //services.AddSingleton<IConfiguration>(configuration);
+            services.AddHttpClient();
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddSingleton<MainWindow>();
 
-            //var serviceProvider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider();
 
-            (new MainWindow(configuration)).Show();
+            var mainWin = serviceProvider.GetRequiredService<MainWindow>();
+            mainWin.Show();
         }
         private string getArg(string[] args, int index) => args.Length > index ? args[index] : null;
     }

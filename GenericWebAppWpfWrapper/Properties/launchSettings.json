@@ -2,7 +2,7 @@
   "profiles": {
     "GenericWebAppWpfWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "https://chat.google.com \"Google Chat\"",
+      "commandLineArgs": "https://vipleague.im/american-football-schedule-streaming-links \"VipLeague\" False True \"embed2.min.js\"",
       "workingDirectory": "C:\\save\\repos\\GenericWebAppWpfWrapper"
     }
   }
