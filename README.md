@@ -13,11 +13,17 @@ there's a few "good citizen" user experiences i'm looking for that don't come wi
 
 ## Usage
 - there are no binary releases... you'll have to build the exe yourself... let me know if there's interest and i'll take the time to create the CI/CD github action script
-- once you have the exe, the idea is to create a shortcut to it with two parameters (see blahLnk.lnk example in this repo):
+- once you have the exe, the idea is to create a shortcut to it with following parameters in sequential order (see blahLnk.lnk example in this repo):
   1. the url of the web app
-  2. the filename prefix for (blah.ico and blah.js)
-  3. True - if you want this instance to NOT share application storage, cookies, etc.
-  - and set the "Start in:" of the shortcut to the directory those ico and js files are in
+  2. the filename prefix for (blah.ico and blah.js) - this also shows as the main window title in the taskbar etc
+  3. True/False - if you want this instance to NOT share application storage, cookies, etc.
+  4. True/False - true = block all external link nav
+  5. "filename.js" - comma delimited list of strings which are the only script resources allowed to be loaded (wildcard match via "Contains")
+ 
+  example command line:<br/>
+  `path\GenericWebAppWpfWrapper.exe https://vipleague.im/american-football-schedule-streaming-links "VipLeague" False True "embed2.min.js"`
+ 
+  lastly, set the "Start in:" of the shortcut to the directory those ico and js files are in
 
 ## Notes
 - since this does a window minimize on close button, there's an additional button in the title bar to truly quit the app<br/>
