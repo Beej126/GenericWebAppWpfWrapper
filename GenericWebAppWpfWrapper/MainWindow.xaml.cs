@@ -27,6 +27,7 @@ namespace GenericWebAppWpfWrapper
         public readonly bool SeparateUserData = false;
         public readonly bool BlockExternalLinks = false;
         public readonly string[] OnlyAllowScripts = null;
+        public readonly double? AspectRatio;
 
         public MainWindow(IConfiguration config, IHttpClientFactory httpClientFactory)
         {
@@ -40,10 +41,20 @@ namespace GenericWebAppWpfWrapper
             bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
             bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
             this.OnlyAllowScripts = string.IsNullOrWhiteSpace(config["OnlyAllowScripts"]) ? null : config["OnlyAllowScripts"].Split(",");
+            if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
             InitializeComponent();
             this.httpClientFactory = httpClientFactory;
         }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            if (this.AspectRatio == null) return;
+
+            if (sizeInfo.WidthChanged) this.Width = sizeInfo.NewSize.Height * this.AspectRatio.Value;
+            else this.Height = sizeInfo.NewSize.Width / this.AspectRatio.Value;
+        }
+
 
         public override void OnApplyTemplate()
         {
@@ -129,7 +140,7 @@ namespace GenericWebAppWpfWrapper
 
                     //need to flip user agent specifically when on google login page or google blocks with
                     //"Couldn't sign you in... This browser or app may not be secure."
-                    if (savedUserAgent == null) savedUserAgent = wv2.CoreWebView2.Settings.UserAgent;
+                    savedUserAgent ??= wv2.CoreWebView2.Settings.UserAgent;
                     wv2.CoreWebView2.Settings.UserAgent = (new Uri(e.Uri)).Host.Contains("accounts.google.com") ? "could be anything" : savedUserAgent;
 
                     //MessageBox.Show("wv2.CoreWebView2.NavigationStarting\r\n\r\nurl: " + e.Uri + "\r\n\r\nuseragent: " + wv2.CoreWebView2.Settings.UserAgent);
@@ -137,8 +148,11 @@ namespace GenericWebAppWpfWrapper
 
                 wv2.CoreWebView2.NewWindowRequested += (object sender, CoreWebView2NewWindowRequestedEventArgs newWindowArgs) =>
                 {
-                    if (this.BlockExternalLinks && (new Uri(newWindowArgs.Uri)).Host != (new Uri(config["Url"])).Host)
+                    if (this.BlockExternalLinks)
                     {
+                        if (new Uri(newWindowArgs.Uri).Host == new Uri(config["Url"]).Host)
+                            wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
+
                         newWindowArgs.Handled = true;
                         return;
                     }

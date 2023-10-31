@@ -55,7 +55,8 @@ namespace GenericWebAppWpfWrapper
                     { "AppName", getArg(e.Args, 1) },
                     { "SeparateUserData", getArg(e.Args, 2) },
                     { "BlockExternalLinks", getArg(e.Args, 3) },
-                    { "OnlyAllowScripts", getArg(e.Args, 4) }
+                    { "OnlyAllowScripts", getArg(e.Args, 4) },
+                    { "AspectRatio", getArg(e.Args, 5) },
                 })
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();

@@ -1,11 +1,11 @@
+taskkill /f /im GenericWebAppWpfWrapper.exe
+
 ECHO,
 echo DONT FORGET TO BUILD THE RELEASE FOLDER!!!!
 ECHO,
 PAUSE
 ECHO,
 ECHO,
-
-taskkill /f /im GenericWebAppWpfWrapper.exe
 
 del /f /q C:\save\GenericWebAppWpfWrapper\bin\*.*
 rmdir /q /s C:\save\GenericWebAppWpfWrapper\bin\runtimes
