@@ -13,23 +13,24 @@ there's a few "good citizen" user experiences i'm looking for that don't come wi
 
 ## Usage
 - there are no binary releases published here yet... you'll have to build the exe yourself... let me know if there's interest and i'll take the time to create the CI/CD github action script
-- once you have the exe, the idea is to create shortcuts to it with following parameters in sequential order (see .lnk examples in this repo):
-  <div>---------- first two parms are required ------</div>
+- once you have the exe, the idea is to create shortcuts to it with following <mark>command line parameters</mark> in sequential order (see .lnk examples in this repo):
+<div style="margin-left: 3em">---------- first two parms are required ------
 
 1. the starting url (e.g. https://gmail.com)
 1. appname (e.g. Gmail) - this correlates to:
     - the main window title
     - pulling appname.ico for the running taskbar icon
-    - loading appname.js as custom script that executes inside of every web page the designated url winds up loading... this faciliates all kinds of customization... i'm using it to scrape pages for message counts and display that on the windows taskbar... i've also leveraged it for customizing and elimating undersirable page content (see vipleague.js), ala a mini "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)"
-    <div style="margin-left: -2em">---------- the rest are optional ------</div>
+    - loading appname.js as custom script that executes inside of every web page loaded by the initial url. one primary usage pattern is scraping the web pages for message counts (which get displayed as the Windows Taskbar icon's "badge"). but this also faciliates all kinds of "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)" hacking, like changing or eliminating page content (see vipleague.js for examples, although now parm #5, blocking scripts, has eliminated the need for me in this case)
+    <div style="margin-left: -3em">---------- the rest are optional ------</div>
 1. True/False - [Default: False] True = separate folder for application storage, cookies, etc.
 1. True/False - [Default: False] True = block all external link nav (good for disabling sites that are riddled with click jacking)
-1. "filename1.js,filename2.js" - comma delimited list of strings which are the only script resources allowed to be loaded (wildcard match via "Contains")
-1. x:y - aspect ratio, decimals allowed (e.g. 16:9.5 somehow worked best for a video site)
+1. "filename1.js,filename2.js" - comma delimited list of strings which are the only script resources allowed to be loaded (fyi, implemented as wildcard match via string.Contains)
+1. x:y - forced window aspect ratio. decimals allowed (e.g. 16:9.5 somehow worked best for a video site)
  
   example command line:<br/>
   `path\GenericWebAppWpfWrapper.exe https://vipleague.im/american-football-schedule-streaming-links "VipLeague" False True "embed2.min.js" 16:9.5`
- 
+</div>
+
   lastly, set the "Start in:" of the shortcut to the directory those ico and js files are in
 
 ## Notes
