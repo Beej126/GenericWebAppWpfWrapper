@@ -16,16 +16,16 @@ there's a few "good citizen" user experiences i'm looking for that don't come wi
 - once you have the exe, the idea is to create shortcuts to it with following parameters in sequential order (see .lnk examples in this repo):
   <div>---------- first two parms are required ------</div>
 
-  1. the starting url (e.g. https://gmail.com)
-  1. appname (e.g. Gmail) - this correlates to:
-     - the main window title
-     - pulling appname.ico for the running taskbar icon
-     - loading appname.js as custom script that executes inside of every web page the designated url winds up loading... this faciliates all kinds of customization... i'm using it to scrape pages for message counts and display that on the windows taskbar... i've also leveraged it for customizing and elimating undersirable page content (see vipleague.js), ala a mini "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)"
-      <div>---------- the rest are optional ------</div>
-  1. True/False - [Default: False] True = separate folder for application storage, cookies, etc.
-  1. True/False - [Default: False] True = block all external link nav (good for disabling sites that are riddled with click jacking)
-  1. "filename1.js,filename2.js" - comma delimited list of strings which are the only script resources allowed to be loaded (wildcard match via "Contains")
-  1. x:y - aspect ratio, decimals allowed (e.g. 16:9.5 somehow worked best for a video site)
+1. the starting url (e.g. https://gmail.com)
+1. appname (e.g. Gmail) - this correlates to:
+    - the main window title
+    - pulling appname.ico for the running taskbar icon
+    - loading appname.js as custom script that executes inside of every web page the designated url winds up loading... this faciliates all kinds of customization... i'm using it to scrape pages for message counts and display that on the windows taskbar... i've also leveraged it for customizing and elimating undersirable page content (see vipleague.js), ala a mini "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)"
+    <div style="margin-left: -2em">---------- the rest are optional ------</div>
+1. True/False - [Default: False] True = separate folder for application storage, cookies, etc.
+1. True/False - [Default: False] True = block all external link nav (good for disabling sites that are riddled with click jacking)
+1. "filename1.js,filename2.js" - comma delimited list of strings which are the only script resources allowed to be loaded (wildcard match via "Contains")
+1. x:y - aspect ratio, decimals allowed (e.g. 16:9.5 somehow worked best for a video site)
  
   example command line:<br/>
   `path\GenericWebAppWpfWrapper.exe https://vipleague.im/american-football-schedule-streaming-links "VipLeague" False True "embed2.min.js" 16:9.5`
