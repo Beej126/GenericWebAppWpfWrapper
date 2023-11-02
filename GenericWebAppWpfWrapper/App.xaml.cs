@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Windows;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net;
 
 namespace GenericWebAppWpfWrapper
 {
@@ -63,9 +65,27 @@ namespace GenericWebAppWpfWrapper
 
             var services = new ServiceCollection();
 
-            services.AddHttpClient();
+            //CookieContainer cookieContainer = new();
+            //from: https://github.com/dotnet/extensions/issues/872#issuecomment-496419597
+            services.AddHttpClient("default");
+                //.ConfigureHttpMessageHandlerBuilder(builder =>
+                //{
+                //    if (builder.PrimaryHandler is HttpClientHandler handler)
+                //    {
+                //        //see WebResourceRequested in MainWindow.xaml.cs
+                //        // apparently by setting HttpClientHandler.UseCookies false the HttpClient then allows cookies to be set manually
+                //        // but these never got sent in the actual request!?!?
+                //        handler.UseCookies = false;
+
+                //        //trying this approach: https://stackoverflow.com/questions/56820489/httprequestmessage-doesnt-add-cookie-into-request/56822712#56822712
+                //        //handler.CookieContainer = cookieContainer;
+
+                //    }
+                //});
+
             services.AddSingleton<IConfiguration>(configuration);
             services.AddSingleton<MainWindow>();
+            //services.AddSingleton<CookieContainer>(cookieContainer);
 
             var serviceProvider = services.BuildServiceProvider();
 

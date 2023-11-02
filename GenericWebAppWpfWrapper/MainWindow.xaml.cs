@@ -1,10 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http; //needed for IHttpClientFactory, from Microsoft.Extensions.Http nuget package
+using System.Net.Http.Headers;
 using System.Text;
 //using System.Linq;
 //using System.Security.Policy;
@@ -23,28 +27,32 @@ namespace GenericWebAppWpfWrapper
         private bool isReallyExit = false;
         private readonly IConfiguration config;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IServiceProvider serviceProvider;
 
+        public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
         public readonly bool BlockExternalLinks = false;
         public readonly string[] OnlyAllowScripts = null;
         public readonly double? AspectRatio;
 
-        public MainWindow(IConfiguration config, IHttpClientFactory httpClientFactory)
+        public MainWindow(IConfiguration config, IHttpClientFactory httpClientFactory, IServiceProvider serviceProvider)
         {
             this.config = config;
             this.httpClientFactory = httpClientFactory;
+            this.serviceProvider = serviceProvider;
 
             this.Icon = new BitmapImage(new Uri(Path.Combine(Directory.GetCurrentDirectory(), config["AppName"].Replace(" ", "") + ".ico")));
             this.Title = config["AppName"];
-            this.WindowState = WindowState.Minimized;
 
+            this.StartUrl = config["Url"];
             bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
             bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
             this.OnlyAllowScripts = string.IsNullOrWhiteSpace(config["OnlyAllowScripts"]) ? null : config["OnlyAllowScripts"].Split(",");
             if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
+            if (this.AspectRatio == null) this.WindowState = WindowState.Minimized;
+
             InitializeComponent();
-            this.httpClientFactory = httpClientFactory;
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
@@ -126,7 +134,7 @@ namespace GenericWebAppWpfWrapper
 
                 wv2.CoreWebView2.NavigationStarting += (object sender, CoreWebView2NavigationStartingEventArgs e) =>
                 {
-                    if (this.BlockExternalLinks && (new Uri(e.Uri)).Host != (new Uri(config["Url"])).Host)
+                    if (this.BlockExternalLinks && (new Uri(e.Uri)).Host != (new Uri(this.StartUrl)).Host)
                     {
                         e.Cancel = true;
                         return;
@@ -150,7 +158,7 @@ namespace GenericWebAppWpfWrapper
                 {
                     if (this.BlockExternalLinks)
                     {
-                        if (new Uri(newWindowArgs.Uri).Host == new Uri(config["Url"]).Host)
+                        if (new Uri(newWindowArgs.Uri).Host == new Uri(this.StartUrl).Host)
                             wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
 
                         newWindowArgs.Handled = true;
@@ -234,11 +242,68 @@ namespace GenericWebAppWpfWrapper
 
                 if (this.OnlyAllowScripts != null)
                 {
-                    wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script);
+                    wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script, CoreWebView2WebResourceRequestSourceKinds.All);
+                    //wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Document);
+                    //wv2.CoreWebView2.WebResourceResponseReceived += (object sender, CoreWebView2WebResourceResponseReceivedEventArgs e) =>
+                    //{
+                    //    //e.Response.con
+                    //};
+
                     wv2.CoreWebView2.WebResourceRequested += (object sender, CoreWebView2WebResourceRequestedEventArgs e) =>
                     {
+                        //if (e.ResourceContext == CoreWebView2WebResourceContext.Document)
+                        //{
+                        //    var requestUri = new Uri(e.Request.Uri);
+                        //    if (requestUri.Host != new Uri(this.StartUrl).Host) return;
+
+                        //    //if (new Uri(e.Request.Uri).Host != new Uri(this.StartUrl).Host)
+                        //    //{
+                        //    using var deferral = e.GetDeferral();
+
+                        //    //var cookieContainer = new CookieContainer();
+                        //    //using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
+                        //    //cookieContainer.Add(new Cookie("CookieName", "cookie_value"));
+                        //    HttpRequestMessage request = new()
+                        //    {
+                        //        RequestUri = requestUri,
+                        //        Method = e.Request.Method == "POST" ? HttpMethod.Post : HttpMethod.Get,
+                        //        Content = e.Request.Content != null ? new StreamContent(e.Request.Content) : null
+                        //    };
+                        //    e.Request.Headers.ForEach(h => request.Headers.TryAddWithoutValidation(h.Key, h.Value));
+
+                        //    var client = httpClientFactory.CreateClient("default");
+
+                        //    //if (e.Request.Headers.Contains("Cookie"))
+                        //    //{
+                        //    //    request.Headers.Remove("Cookie");
+                        //    //    //var cookieChunks = e.Request.Headers.GetHeader("Cookie").Split("; ");
+                        //    //    //var cookieContainer = serviceProvider.GetRequiredService<CookieContainer>();
+                        //    //    //cookieChunks.ForEach(chunk =>
+                        //    //    //{
+                        //    //    //    var nameValue = chunk.Split("=");
+                        //    //    //    cookieContainer.Add(new Cookie { Name = nameValue[0], Path = "/", Domain = request.RequestUri.Host, Value = nameValue[1], HttpOnly = true, Secure = true });
+                        //    //    //});
+                        //    //    client.DefaultRequestHeaders.Add("Cookie", e.Request.Headers.GetHeader("Cookie"));
+                        //    //}
+
+                        //    var response = client.SendAsync(request).Result;
+                        //    //using var reader = new StreamReader(e.Request.Content, Encoding.UTF8);
+                        //    //var strContent = reader.ReadToEnd();
+                        //    //var response = e.Request.Method == "POST" ? client.PostAsync(e.Request.Uri, new StreamContent(e.Request.Content)).Result : client.GetAsync(e.Request.Uri).Result;
+                        //    var content = response.Content.ReadAsStringAsync().Result;
+                        //    content = content.Replace("atob", "console.log");
+                        //    e.Response = wv2.CoreWebView2.Environment.CreateWebResourceResponse(content.ToStream(), 200, "OK", null);
+                        //    //}
+
+                        //    return;
+
+                        //}
+
                         //if not a script request or the one script that truly matters for playing the video, allow it pass unscathed
-                        if (this.OnlyAllowScripts.Any(scriptNameFragment => e.Request.Uri.Contains(scriptNameFragment))) return;
+                        if (
+                            this.OnlyAllowScripts.Any(scriptNameFragment => e.Request.Uri.Contains(scriptNameFragment))
+                        )
+                            return;
                         else
                         {
                             //otherwise reject it
@@ -261,7 +326,7 @@ namespace GenericWebAppWpfWrapper
                         //using var deferral = e.GetDeferral();
 
                         //var client = httpClientFactory.CreateClient();
-                        //var host = "https://" + new Uri(config["Url"]).Host;
+                        //var host = "https://" + new Uri(this.StartUrl).Host;
                         //client.DefaultRequestHeaders.Add("Origin", host);
                         //client.DefaultRequestHeaders.Add("Referer", e.Request.Headers.GetHeader("Referer"));
 
@@ -322,9 +387,8 @@ namespace GenericWebAppWpfWrapper
             };
 
             //thinking it's pretty crucial to set this as the very last step after all the above configs have been applied since this is what triggers the loading of a page
-            wv2.Source = new Uri(config["Url"]);
+            wv2.Source = new Uri(this.StartUrl);
         }
-
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
@@ -337,7 +401,7 @@ namespace GenericWebAppWpfWrapper
         }
     }
 
-    public static class StreamExtenstions
+    public static class Extentions
     {
         public static Stream ToStream(this string value)
             => new MemoryStream(Encoding.UTF8.GetBytes(value ?? string.Empty));
@@ -348,6 +412,5 @@ namespace GenericWebAppWpfWrapper
             stream.Read(bytes, 0, (int)stream.Length);
             return Encoding.UTF8.GetString(bytes);
         }
-
     }
 }
