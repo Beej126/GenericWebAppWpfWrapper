@@ -11,13 +11,14 @@
         Closing="Window_Closing"
         StateChanged="Window_StateChanged"
 >
-    <!-- put button in title bar area...
-    slightly older example but good baseline for wanting to add button 
-    https://www.codeproject.com/Tips/799302/WPF-Csharp-VB-NET-Additional-fourth-button-on-wind
+    <!--
+        put button in title bar area...
+        slightly older example but good baseline for wanting to add button 
+        https://www.codeproject.com/Tips/799302/WPF-Csharp-VB-NET-Additional-fourth-button-on-wind
 
-    updated syntax for the windows shell/chrome stuff
-    https://try2explore.com/questions/11506388
-  -->
+        updated syntax for the windows shell/chrome stuff
+        https://try2explore.com/questions/11506388
+    -->
     <Window.Style>
         <Style TargetType="{x:Type Window}">
             <Setter Property="WindowChrome.WindowChrome">

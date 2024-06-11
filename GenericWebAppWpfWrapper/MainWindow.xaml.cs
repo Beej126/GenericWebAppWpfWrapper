@@ -81,13 +81,58 @@ namespace GenericWebAppWpfWrapper
             this.Close();
         }
 
+        // https://github.com/dotnet/wpf/issues/3627#issuecomment-902293654
+        static private (double height, double width) GetVirtualWindowSize()
+        {
+            Window virtualWindow = new Window();
+            virtualWindow.Opacity = 0;
+            virtualWindow.Show();
+            virtualWindow.WindowState = WindowState.Maximized;
+            double returnHeight = virtualWindow.Height;
+            double returnWidth = virtualWindow.Width;
+            virtualWindow.Close();
+            return (returnHeight, returnWidth);
+        }
+
+        static private WindowStyle restoreWindowStyle = new();
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
 
-            if (!e.Handled && e.Key == Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+            if (!e.Handled)
             {
-                WindowState = WindowState.Minimized;
+                switch (e.Key)
+                {
+                    // minimize
+                    case Key.Escape:
+                        WindowState = WindowState.Minimized;
+                        break;
+
+                    // full screen mode
+                    case Key.F11:
+                        switch (WindowState)
+                        {
+                            case WindowState.Normal:
+                                restoreWindowStyle = WindowStyle;
+                                WindowStyle = WindowStyle.None;
+                                //var sizingParams = GetVirtualWindowSize();
+                                WindowState = WindowState.Maximized;
+                                //Height = sizingParams.height;
+                                //Width = sizingParams.width;
+                                break;
+                            case WindowState.Maximized:
+                                WindowStyle = restoreWindowStyle;
+                                WindowState = WindowState.Normal;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case Key.F10:
+                        Topmost = !Topmost;
+                        break;
+                }
             }
         }
 
@@ -149,7 +194,7 @@ namespace GenericWebAppWpfWrapper
                     //need to flip user agent specifically when on google login page or google blocks with
                     //"Couldn't sign you in... This browser or app may not be secure."
                     savedUserAgent ??= wv2.CoreWebView2.Settings.UserAgent;
-                    wv2.CoreWebView2.Settings.UserAgent = (new Uri(e.Uri)).Host.Contains("accounts.google.com") ? "could be anything" : savedUserAgent;
+                    //wv2.CoreWebView2.Settings.UserAgent = (new Uri(e.Uri)).Host.Contains("accounts.google.com") ? "could be anything" : savedUserAgent;
 
                     //MessageBox.Show("wv2.CoreWebView2.NavigationStarting\r\n\r\nurl: " + e.Uri + "\r\n\r\nuseragent: " + wv2.CoreWebView2.Settings.UserAgent);
                 };
@@ -168,10 +213,17 @@ namespace GenericWebAppWpfWrapper
                     //let "about" windows do their normal thing since it's how gmail launches the print preview popup and stuff like that
                     if (newWindowArgs.Uri.StartsWith("about://")) { }
 
-                    //if we're launching a new window for google login,
-                    //we need to send it back to the existing webview so we can control the UserAgent
-                    //which is the crucial piece of avoiding google's embedded-webview block
-                    else if (newWindowArgs.Uri.Contains("accounts.google.com"))
+                    else if (newWindowArgs.Uri.Contains("accounts.google.com")) { }
+
+                    else if (
+                        //if we're launching a new window for google login,
+                        //we need to send it back to the existing webview so we can control the UserAgent
+                        //which is the crucial piece of avoiding google's embedded-webview block
+                        newWindowArgs.Uri.Contains("accounts.google.com")
+
+                        // also trap in local window if we're just trying to get back to the root url of this app (became necessary for some oddball login flows with google voice)
+                        || newWindowArgs.Uri.StartsWith(this.StartUrl)
+                       )
                     {
                         //newWindowArgs.NewWindow = wv2.CoreWebView2; //this worked for voice.google.com but crashed for mail.google.com
                         newWindowArgs.Handled = true;
@@ -242,7 +294,7 @@ namespace GenericWebAppWpfWrapper
 
                 if (this.OnlyAllowScripts != null)
                 {
-                    wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script, CoreWebView2WebResourceRequestSourceKinds.All);
+                    wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script);
                     //wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Document);
                     //wv2.CoreWebView2.WebResourceResponseReceived += (object sender, CoreWebView2WebResourceResponseReceivedEventArgs e) =>
                     //{

@@ -1,3 +1,5 @@
+@echo off
+
 taskkill /f /im GenericWebAppWpfWrapper.exe
 
 ECHO,
