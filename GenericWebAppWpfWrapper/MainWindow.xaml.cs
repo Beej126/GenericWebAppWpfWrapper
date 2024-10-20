@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http; //needed for IHttpClientFactory, from Microsoft.Extensions.Http nuget package
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 //using System.Linq;
 //using System.Security.Policy;
@@ -29,6 +30,7 @@ namespace GenericWebAppWpfWrapper
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IServiceProvider serviceProvider;
 
+        public readonly string BasePath = Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
         public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
         public readonly bool BlockExternalLinks = false;
@@ -41,7 +43,7 @@ namespace GenericWebAppWpfWrapper
             this.httpClientFactory = httpClientFactory;
             this.serviceProvider = serviceProvider;
 
-            this.Icon = new BitmapImage(new Uri(Path.Combine(Directory.GetCurrentDirectory(), config["AppName"].Replace(" ", "") + ".ico")));
+            this.Icon = new BitmapImage(new Uri(Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico")));
             this.Title = config["AppName"];
 
             this.StartUrl = config["Url"];
@@ -288,7 +290,7 @@ namespace GenericWebAppWpfWrapper
                 //https://www.fatalerrors.org/a/excerpt-interaction-between-webview2-and-js.html
 
                 //AddScriptToExecuteOnDocumentCreatedAsync fires on frames as well which gives us full power to override spammity spam vs just the main page
-                var embeddedScriptFilePath = Path.Combine(Directory.GetCurrentDirectory(), config["AppName"].Replace(" ", "") + ".js");
+                var embeddedScriptFilePath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".js");
                 if (File.Exists(embeddedScriptFilePath))
                     wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
 
@@ -435,7 +437,7 @@ namespace GenericWebAppWpfWrapper
             //and this way you can control that more directly by having a dedicated UserData folder
             wv2.CreationProperties = new Microsoft.Web.WebView2.Wpf.CoreWebView2CreationProperties
             {
-                UserDataFolder = (this.SeparateUserData ? config["AppName"] : "Shared") + " UserData"
+                UserDataFolder = Path.Combine(Directory.GetCurrentDirectory(), (this.SeparateUserData ? config["AppName"] : "Shared") + " UserData")
             };
 
             //thinking it's pretty crucial to set this as the very last step after all the above configs have been applied since this is what triggers the loading of a page

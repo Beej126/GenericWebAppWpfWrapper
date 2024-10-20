@@ -50,7 +50,7 @@ namespace GenericWebAppWpfWrapper
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 //.SetBasePath(Directory.GetCurrentDirectory())
-                .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
+                //.SetBasePath(Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName)
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     { "Url", getArg(e.Args, 0) },
@@ -60,7 +60,7 @@ namespace GenericWebAppWpfWrapper
                     { "OnlyAllowScripts", getArg(e.Args, 4) },
                     { "AspectRatio", getArg(e.Args, 5) },
                 })
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                //not used yet:.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var services = new ServiceCollection();
