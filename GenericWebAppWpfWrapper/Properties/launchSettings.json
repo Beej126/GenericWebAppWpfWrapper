@@ -2,8 +2,8 @@
   "profiles": {
     "GenericWebAppWpfWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "https://vipleague.im/american-football-schedule-streaming-links \"VipLeague\" False True \"schedule.bun,stream.bun,embed2.min,jwplayer,hls.light\" 16:9.5",
-      "workingDirectory": "C:\\save\\repos\\GenericWebAppWpfWrapper"
+      "commandLineArgs": "https://gmail.google.com \"Gmail\"",
+      "workingDirectory": "C:\\save\\GenericWebAppWpfWrapper_UserData"
     }
   }
 }

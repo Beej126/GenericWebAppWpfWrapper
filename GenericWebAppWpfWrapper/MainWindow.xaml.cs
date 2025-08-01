@@ -30,7 +30,7 @@ namespace GenericWebAppWpfWrapper
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IServiceProvider serviceProvider;
 
-        public readonly string BasePath = Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
+        public readonly string BasePath = Directory.GetCurrentDirectory(); //.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
         public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
         public readonly bool BlockExternalLinks = false;
@@ -203,19 +203,13 @@ namespace GenericWebAppWpfWrapper
 
                 wv2.CoreWebView2.NewWindowRequested += (object sender, CoreWebView2NewWindowRequestedEventArgs newWindowArgs) =>
                 {
-                    if (this.BlockExternalLinks)
-                    {
-                        if (new Uri(newWindowArgs.Uri).Host == new Uri(this.StartUrl).Host)
-                            wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
+                    //let certain urls do their normal popup thing since it's how gmail launches the print preview popup and stuff like that
+                    if (
+                        newWindowArgs.Uri.StartsWith("about://")
+                        || newWindowArgs.Uri.Contains("mail.google.com")
+                    ) { }
 
-                        newWindowArgs.Handled = true;
-                        return;
-                    }
-
-                    //let "about" windows do their normal thing since it's how gmail launches the print preview popup and stuff like that
-                    if (newWindowArgs.Uri.StartsWith("about://")) { }
-
-                    else if (newWindowArgs.Uri.Contains("accounts.google.com")) { }
+                    //else if (newWindowArgs.Uri.Contains("accounts.google.com")) { }
 
                     else if (
                         //if we're launching a new window for google login,
@@ -230,6 +224,17 @@ namespace GenericWebAppWpfWrapper
                         //newWindowArgs.NewWindow = wv2.CoreWebView2; //this worked for voice.google.com but crashed for mail.google.com
                         newWindowArgs.Handled = true;
                         wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
+                    }
+
+                    else if (this.BlockExternalLinks)
+                    {
+                        //besides ignoring external links completely,
+                        //  the BlockExternalLinks flag also routes *internal* links back into the existing webview
+                        if (new Uri(newWindowArgs.Uri).Host == new Uri(this.StartUrl).Host)
+                            wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
+
+                        newWindowArgs.Handled = true;
+                        return;
                     }
 
                     //otherwise launch external links out to OS's default browser to get the best experience with cached logins and extensions, versus trapped in the self contained web view
