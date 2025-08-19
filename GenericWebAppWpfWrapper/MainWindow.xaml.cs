@@ -40,11 +40,11 @@ namespace GenericWebAppWpfWrapper
             this.serviceProvider = serviceProvider;
 
             this.StartUrl = config["Url"];
-            this.Title = config["AppName"];
+            this.Title = config["Title"];
 
-            string iconPath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico");
+            string iconPath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".ico");
             if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
-            else _ = SetFaviconAsIconAsync(this.StartUrl);
+            else _ = SetFaviconAsIconAsync(this.StartUrl, iconPath);
 
             _ = bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
             bool.TryParse(config["BlockExternalLinks"], out BlockExternalLinks);
@@ -58,7 +58,7 @@ namespace GenericWebAppWpfWrapper
 
 
 
-        private async System.Threading.Tasks.Task SetFaviconAsIconAsync(string url)
+        private async System.Threading.Tasks.Task SetFaviconAsIconAsync(string url, string iconPath)
         {
             try
             {
@@ -94,6 +94,9 @@ namespace GenericWebAppWpfWrapper
                 }
                 var bestIcon = iconUrls.OrderByDescending(i => i.size).FirstOrDefault();
                 var iconBytes = await client.GetByteArrayAsync(bestIcon.href);
+
+                File.WriteAllBytes(iconPath, iconBytes);
+
                 using var ms = new MemoryStream(iconBytes);
 
                 var decoder = new IconBitmapDecoder(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
@@ -108,8 +111,8 @@ namespace GenericWebAppWpfWrapper
                 this.Dispatcher.Invoke(() =>
                 {
                     this.Icon = cropped;
-                    this.Hide();
-                    this.Show();
+                    //this.Hide();
+                    //this.Show();
                 });
             }
             catch { /* ignore errors, fallback to no icon */ }
@@ -353,7 +356,7 @@ namespace GenericWebAppWpfWrapper
                 //https://www.fatalerrors.org/a/excerpt-interaction-between-webview2-and-js.html
 
                 //AddScriptToExecuteOnDocumentCreatedAsync fires on frames as well which gives us full power to override spammity spam vs just the main page
-                var embeddedScriptFilePath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".js");
+                var embeddedScriptFilePath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".js");
                 if (File.Exists(embeddedScriptFilePath))
                     wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
 
@@ -500,7 +503,7 @@ namespace GenericWebAppWpfWrapper
             //and this way you can control that more directly by having a dedicated UserData folder
             wv2.CreationProperties = new Microsoft.Web.WebView2.Wpf.CoreWebView2CreationProperties
             {
-                UserDataFolder = Path.Combine(Directory.GetCurrentDirectory(), (this.SeparateUserData ? config["AppName"] : "Shared") + " UserData")
+                UserDataFolder = Path.Combine(Directory.GetCurrentDirectory(), (this.SeparateUserData ? config["Title"] : "Shared") + " UserData")
             };
 
             //thinking it's pretty crucial to set this as the very last step after all the above configs have been applied since this is what triggers the loading of a page

@@ -15,7 +15,7 @@ namespace GenericWebAppWpfWrapper
             var argsDict = ParseCommandLineArgs(e.Args);
 
             // Check for required arguments
-            if (string.IsNullOrWhiteSpace(argsDict["Url"]) || string.IsNullOrWhiteSpace(argsDict["AppName"]))
+            if (string.IsNullOrWhiteSpace(argsDict["Url"]) || string.IsNullOrWhiteSpace(argsDict["Title"]))
             {
                 ShowUsageDialog();
                 Shutdown();
@@ -99,7 +99,6 @@ Example:
             {
                 // Initialize with default keys to ensure they exist in the dictionary
                 { "Url", null },
-                { "AppName", null }, // Keep AppName for backward compatibility
                 { "Title", null },
                 { "SeparateUserData", null },
                 { "BlockExternalLinks", null },
@@ -118,14 +117,8 @@ Example:
                     // Skip the next argument as we've already consumed it as a value
                     i++;
                     
-                    // Map -Title to AppName for backward compatibility
-                    if (string.Equals(key, "Title", StringComparison.OrdinalIgnoreCase))
-                    {
-                        result["AppName"] = value; // Set the AppName value
-                        result["Title"] = value;   // Also set Title
-                    }
                     // Only add it if it's one of our expected keys (case-insensitive)
-                    else if (result.Keys.Any(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase)))
+                    if (result.Keys.Any(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase)))
                     {
                         result[key] = value;
                     }
