@@ -29,6 +29,7 @@ namespace GenericWebAppWpfWrapper
         public readonly string BasePath = Directory.GetCurrentDirectory(); //.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName;
         public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
+        public readonly bool AllowNewWindows = false;
         public readonly bool BlockExternalLinks = false;
         public readonly string[] AllowedScripts = null;
         public readonly double? AspectRatio;
@@ -40,14 +41,15 @@ namespace GenericWebAppWpfWrapper
             this.serviceProvider = serviceProvider;
 
             this.StartUrl = config["Url"];
-            this.Title = config["Title"];
+            this.Title = config["Title"] + "   ESC = minimize, F10 = topmost, F11 = full screen";
 
             string iconPath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".ico");
             if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
             else _ = SetFaviconAsIconAsync(this.StartUrl, iconPath);
 
             _ = bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
-            bool.TryParse(config["BlockExternalLinks"], out BlockExternalLinks);
+            bool.TryParse(config["AllowNewWindows"], out this.AllowNewWindows);
+            bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
             this.AllowedScripts = string.IsNullOrWhiteSpace(config["AllowedScripts"]) ? null : config["AllowedScripts"].Split(",");
             if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
@@ -266,8 +268,9 @@ namespace GenericWebAppWpfWrapper
                 {
                     //let certain urls do their normal popup thing since it's how gmail launches the print preview popup and stuff like that
                     if (
-                        newWindowArgs.Uri.StartsWith("about://")
-                        || newWindowArgs.Uri.Contains("mail.google.com")
+                        this.AllowNewWindows ||
+                        newWindowArgs.Uri.StartsWith("about://") ||
+                        newWindowArgs.Uri.Contains("mail.google.com")
                     ) { }
 
                     //else if (newWindowArgs.Uri.Contains("accounts.google.com")) { }

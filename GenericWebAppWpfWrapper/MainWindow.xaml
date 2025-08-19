@@ -34,6 +34,8 @@
                             <Border Background="White" Margin="{Binding Source={x:Static SystemParameters.WindowNonClientFrameThickness}}">
                                 <ContentPresenter Content="{TemplateBinding Content}" />
                             </Border>
+                            <!-- Title text -->
+                            <TextBlock Text="{TemplateBinding Title}" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" FontWeight="SemiBold" WindowChrome.IsHitTestVisibleInChrome="False" />
                             <!-- fouth button! -->
                             <Button Foreground="Gray" x:Name="btnQuit" Focusable="False" Height="25" HorizontalAlignment="Right" Margin="0,1,150,0" VerticalAlignment="Top" Width="50" WindowChrome.IsHitTestVisibleInChrome="True" Background="Transparent" BorderThickness="0">Q</Button>
                         </Grid>

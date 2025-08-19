@@ -78,6 +78,7 @@ Required:
 Optional:
   -SeparateUserData [True/False]    Create separate folder for app storage (Default: False)
   -BlockExternalLinks [True/False]  Block external navigation (Default: False)
+  -AllowNewWindows [True/False]      Allow opening new windows (Default: False)
   -AllowedScripts [scripts]         Comma-delimited list of script resources to allow
   -AspectRatio [x:y]                Force window aspect ratio (e.g., 16:9.5)
 
@@ -102,6 +103,7 @@ Example:
                 { "Title", null },
                 { "SeparateUserData", null },
                 { "BlockExternalLinks", null },
+                { "AllowNewWindows", null },
                 { "AllowedScripts", null },
                 { "AspectRatio", null }
             };
