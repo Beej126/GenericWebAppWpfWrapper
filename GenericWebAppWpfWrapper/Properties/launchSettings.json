@@ -2,7 +2,7 @@
   "profiles": {
     "GenericWebAppWpfWrapper": {
       "commandName": "Project",
-      "commandLineArgs": "https://gmail.google.com \"Gmail\"",
+      "commandLineArgs": "-Url https://gmail.com -Title Gmail",
       "workingDirectory": "C:\\save\\GenericWebAppWpfWrapper_UserData"
     }
   }

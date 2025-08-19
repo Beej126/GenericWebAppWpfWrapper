@@ -1,19 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.Web.WebView2.Core;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http; //needed for IHttpClientFactory, from Microsoft.Extensions.Http nuget package
-using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 //using System.Linq;
 //using System.Security.Policy;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -34,7 +27,7 @@ namespace GenericWebAppWpfWrapper
         public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
         public readonly bool BlockExternalLinks = false;
-        public readonly string[] OnlyAllowScripts = null;
+        public readonly string[] AllowedScripts = null;
         public readonly double? AspectRatio;
 
         public MainWindow(IConfiguration config, IHttpClientFactory httpClientFactory, IServiceProvider serviceProvider)
@@ -43,13 +36,15 @@ namespace GenericWebAppWpfWrapper
             this.httpClientFactory = httpClientFactory;
             this.serviceProvider = serviceProvider;
 
-            this.Icon = new BitmapImage(new Uri(Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico")));
+            string iconPath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico");
+            if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
+
             this.Title = config["AppName"];
 
             this.StartUrl = config["Url"];
             bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
             bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
-            this.OnlyAllowScripts = string.IsNullOrWhiteSpace(config["OnlyAllowScripts"]) ? null : config["OnlyAllowScripts"].Split(",");
+            this.AllowedScripts = string.IsNullOrWhiteSpace(config["AllowedScripts"]) ? null : config["AllowedScripts"].Split(",");
             if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
             if (this.AspectRatio == null) this.WindowState = WindowState.Minimized;
@@ -299,7 +294,7 @@ namespace GenericWebAppWpfWrapper
                 if (File.Exists(embeddedScriptFilePath))
                     wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
 
-                if (this.OnlyAllowScripts != null)
+                if (this.AllowedScripts != null)
                 {
                     wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script);
                     //wv2.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Document);
@@ -360,7 +355,7 @@ namespace GenericWebAppWpfWrapper
 
                         //if not a script request or the one script that truly matters for playing the video, allow it pass unscathed
                         if (
-                            this.OnlyAllowScripts.Any(scriptNameFragment => e.Request.Uri.Contains(scriptNameFragment))
+                            this.AllowedScripts.Any(scriptNameFragment => e.Request.Uri.Contains(scriptNameFragment))
                         )
                             return;
                         else

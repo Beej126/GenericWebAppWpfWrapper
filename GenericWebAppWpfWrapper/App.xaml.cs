@@ -1,65 +1,31 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using System.Linq;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net;
+using System.Linq;
+using System.Windows;
 
 namespace GenericWebAppWpfWrapper
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-
         protected override void OnStartup(StartupEventArgs e)
         {
-            /*
-                if (e.Args.Count() > 0)
-                {
-                    MessageBox.Show("You have the latest version.");
-                    Shutdown();
-                    return;
-                }
+            // Parse command line arguments into a dictionary
+            var argsDict = ParseCommandLineArgs(e.Args);
 
-                JumpTask task = new JumpTask
-                {
-                    Title = "Exit Google Chat",
-                    Description = "Closes the App",
-                    CustomCategory = "Actions",
-                    IconResourcePath = Assembly.GetEntryAssembly().Location,
-                    ApplicationPath = "pwsh.exe",
-                    Arguments = "-WindowStyle Hidden -Command taskkill.exe /f /im GmailZero.exe",
-                    //Assembly.GetEntryAssembly().Location
-                };
-
-                JumpList jumpList = new JumpList();
-                jumpList.JumpItems.Add(task);
-                jumpList.ShowFrequentCategory = false;
-                jumpList.ShowRecentCategory = false;
-
-                JumpList.SetJumpList(Application.Current, jumpList);
-            */
-
-
+            // Check for required arguments
+            if (string.IsNullOrWhiteSpace(argsDict["Url"]) || string.IsNullOrWhiteSpace(argsDict["AppName"]))
+            {
+                ShowUsageDialog();
+                Shutdown();
+                return;
+            }
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 //.SetBasePath(Directory.GetCurrentDirectory())
                 //.SetBasePath(Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName)
-                .AddInMemoryCollection(new Dictionary<string, string>
-                {
-                    { "Url", getArg(e.Args, 0) },
-                    { "AppName", getArg(e.Args, 1) },
-                    { "SeparateUserData", getArg(e.Args, 2) },
-                    { "BlockExternalLinks", getArg(e.Args, 3) },
-                    { "OnlyAllowScripts", getArg(e.Args, 4) },
-                    { "AspectRatio", getArg(e.Args, 5) },
-                })
+                .AddInMemoryCollection(argsDict)
                 //not used yet:.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
@@ -92,7 +58,79 @@ namespace GenericWebAppWpfWrapper
             var mainWin = serviceProvider.GetRequiredService<MainWindow>();
             mainWin.Show();
         }
-        private string getArg(string[] args, int index) => args.Length > index ? args[index] : null;
-    }
 
+        /// <summary>
+        /// Displays usage information when the application is run without arguments
+        /// </summary>
+        private void ShowUsageDialog()
+        {
+            string usageText =
+@"Command Line Arguments:
+
+Required:
+  -Url [url]                        The starting URL (e.g., https://gmail.com)
+  -Title [name]                     The application name (e.g., Gmail)
+                                        Used for window title, .ico filename, and injected .js filename
+                                        spaces are removed from the Title when mapped to filenames
+
+Optional:
+  -SeparateUserData [True/False]    Create separate folder for app storage (Default: False)
+  -BlockExternalLinks [True/False]  Block external navigation (Default: False)
+  -AllowedScripts [scripts]         Comma-delimited list of script resources to allow
+  -AspectRatio [x:y]                Force window aspect ratio (e.g., 16:9.5)
+
+Example:
+  GenericWebAppWpfWrapper.exe -Url https://gmail.com -Title Gmail -BlockExternalLinks True";
+
+            // Use our custom dialog with monospaced font
+            var dialog = new UsageDialog(usageText);
+            dialog.ShowDialog();
+        }
+
+        /// <summary>
+        /// Parses command line arguments into a dictionary
+        /// </summary>
+        private Dictionary<string, string> ParseCommandLineArgs(string[] args)
+        {
+            // Create a dictionary to hold our configuration settings
+            var result = new Dictionary<string, string>
+            {
+                // Initialize with default keys to ensure they exist in the dictionary
+                { "Url", null },
+                { "AppName", null }, // Keep AppName for backward compatibility
+                { "Title", null },
+                { "SeparateUserData", null },
+                { "BlockExternalLinks", null },
+                { "AllowedScripts", null },
+                { "AspectRatio", null }
+            };
+
+            // Parse named arguments in format: -Name value
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i].StartsWith("-", StringComparison.OrdinalIgnoreCase))
+                {
+                    string key = args[i].Substring(1);
+                    string value = args[i + 1];
+                    
+                    // Skip the next argument as we've already consumed it as a value
+                    i++;
+                    
+                    // Map -Title to AppName for backward compatibility
+                    if (string.Equals(key, "Title", StringComparison.OrdinalIgnoreCase))
+                    {
+                        result["AppName"] = value; // Set the AppName value
+                        result["Title"] = value;   // Also set Title
+                    }
+                    // Only add it if it's one of our expected keys (case-insensitive)
+                    else if (result.Keys.Any(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        result[key] = value;
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
 }
