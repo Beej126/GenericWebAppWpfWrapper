@@ -22,6 +22,8 @@ namespace GenericWebAppWpfWrapper
                 return;
             }
 
+            if (!argsDict["Url"].StartsWith("http")) argsDict["Url"] = "https://" + argsDict["Url"];
+
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 //.SetBasePath(Directory.GetCurrentDirectory())
                 //.SetBasePath(Directory.GetParent(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).FullName)
@@ -68,7 +70,7 @@ namespace GenericWebAppWpfWrapper
 @"Command Line Arguments:
 
 Required:
-  -Url [url]                        The starting URL (e.g., https://gmail.com)
+  -Url [url]                        The starting URL (e.g., mail.google.com), https:// will be added automatically if not present
   -Title [name]                     The application name (e.g., Gmail)
                                         Used for window title, .ico filename, and injected .js filename
                                         spaces are removed from the Title when mapped to filenames
@@ -80,7 +82,7 @@ Optional:
   -AspectRatio [x:y]                Force window aspect ratio (e.g., 16:9.5)
 
 Example:
-  GenericWebAppWpfWrapper.exe -Url https://gmail.com -Title Gmail -BlockExternalLinks True";
+  GenericWebAppWpfWrapper.exe -Url mail.google.com -Title Gmail -BlockExternalLinks True";
 
             // Use our custom dialog with monospaced font
             var dialog = new UsageDialog(usageText);

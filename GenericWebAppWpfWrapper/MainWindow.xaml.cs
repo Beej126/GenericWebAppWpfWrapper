@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http; //needed for IHttpClientFactory, from Microsoft.Extensions.Http nuget package
@@ -10,8 +11,10 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 
 namespace GenericWebAppWpfWrapper
 {
@@ -36,20 +39,80 @@ namespace GenericWebAppWpfWrapper
             this.httpClientFactory = httpClientFactory;
             this.serviceProvider = serviceProvider;
 
-            string iconPath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico");
-            if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
-
+            this.StartUrl = config["Url"];
             this.Title = config["AppName"];
 
-            this.StartUrl = config["Url"];
-            bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
-            bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
+            string iconPath = Path.Combine(BasePath, config["AppName"].Replace(" ", "") + ".ico");
+            if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
+            else _ = SetFaviconAsIconAsync(this.StartUrl);
+
+            _ = bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
+            bool.TryParse(config["BlockExternalLinks"], out BlockExternalLinks);
             this.AllowedScripts = string.IsNullOrWhiteSpace(config["AllowedScripts"]) ? null : config["AllowedScripts"].Split(",");
             if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
             if (this.AspectRatio == null) this.WindowState = WindowState.Minimized;
 
             InitializeComponent();
+        }
+
+
+
+        private async System.Threading.Tasks.Task SetFaviconAsIconAsync(string url)
+        {
+            try
+            {
+                var client = httpClientFactory.CreateClient();
+                var html = await client.GetStringAsync(url);
+                var iconUrls = new System.Collections.Generic.List<(string href, int size)>();
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(html);
+                foreach (var link in doc.DocumentNode.SelectNodes("//link[@rel='icon' or @rel='shortcut icon' or @rel='apple-touch-icon']") ?? Enumerable.Empty<HtmlAgilityPack.HtmlNode>())
+                {
+                    var href = link.GetAttributeValue("href", null);
+                    var sizes = link.GetAttributeValue("sizes", "");
+                    int size = 0;
+                    if (!string.IsNullOrEmpty(sizes) && sizes.Contains("x"))
+                    {
+                        var parts = sizes.Split('x');
+                        int.TryParse(parts[0], out size);
+                    }
+                    if (!string.IsNullOrEmpty(href))
+                    {
+                        if (!href.StartsWith("http"))
+                        {
+                            var baseUri = new Uri(url);
+                            href = new Uri(baseUri, href).ToString();
+                        }
+                        iconUrls.Add((href, size));
+                    }
+                }
+                if (!iconUrls.Any())
+                {
+                    var baseUri = new Uri(url);
+                    iconUrls.Add((baseUri.Scheme + "://" + baseUri.Host + "/favicon.ico", 0));
+                }
+                var bestIcon = iconUrls.OrderByDescending(i => i.size).FirstOrDefault();
+                var iconBytes = await client.GetByteArrayAsync(bestIcon.href);
+                using var ms = new MemoryStream(iconBytes);
+
+                var decoder = new IconBitmapDecoder(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+                // Pick the largest frame by pixel dimensions
+                var largest = decoder.Frames
+                    .OrderByDescending(f => f.PixelWidth * f.PixelHeight)
+                    .FirstOrDefault();
+                largest?.Freeze(); // Optional for thread safety
+                var cropped = largest.CropTransparentPixels();
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.Icon = cropped;
+                    this.Hide();
+                    this.Show();
+                });
+            }
+            catch { /* ignore errors, fallback to no icon */ }
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
