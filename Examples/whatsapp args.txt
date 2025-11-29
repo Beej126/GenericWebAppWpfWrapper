@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url web.whatsapp.com -Title WhatsApp

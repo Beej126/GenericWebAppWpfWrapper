@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url mail.google.com -Title Gmail

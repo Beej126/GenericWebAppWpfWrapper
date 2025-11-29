@@ -76,14 +76,15 @@ Required:
                                         spaces are removed from the Title when mapped to filenames
 
 Optional:
-  -SeparateUserData [True/False]    Create separate folder for app storage (Default: False)
-  -BlockExternalLinks [True/False]  Block external navigation (Default: False)
-  -AllowNewWindows [True/False]      Allow opening new windows (Default: False)
-  -AllowedScripts [scripts]         Comma-delimited list of script resources to allow
-  -AspectRatio [x:y]                Force window aspect ratio (e.g., 16:9.5)
+  -SeparateUserData [True/False]      Create separate folder for app storage (Default: False)
+  -AllowExternalHosts [host1, host2]  Comma-delimited list of raw hosts names to allow
+                                        (exclude parm = allow ALL, include parm with empty value = BLOCK ALL)
+  -AllowNewWindows [True/False]       Allow opening new windows (Default: False)
+  -AllowedScripts [scripts]           Comma-delimited list of script resources to allow
+  -AspectRatio [x:y]                  Force window aspect ratio (e.g., 16:9.5)
 
 Example:
-  GenericWebAppWpfWrapper.exe -Url mail.google.com -Title Gmail -BlockExternalLinks True";
+  GenericWebAppWpfWrapper.exe -Url mail.google.com -Title Gmail";
 
             // Use our custom dialog with monospaced font
             var dialog = new UsageDialog(usageText);
@@ -102,7 +103,7 @@ Example:
                 { "Url", null },
                 { "Title", null },
                 { "SeparateUserData", null },
-                { "BlockExternalLinks", null },
+                { "AllowExternalHosts", null },
                 { "AllowNewWindows", null },
                 { "AllowedScripts", null },
                 { "AspectRatio", null }

@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url www.iheart.com/live/949-kuow-7195/ -Title NPR

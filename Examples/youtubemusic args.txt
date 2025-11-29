@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url music.youtube.com/playlist?list=LM -Title YouTubeMusic

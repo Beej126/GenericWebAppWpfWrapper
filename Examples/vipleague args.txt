@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url vipleague.im/american-football-schedule-streaming-links -Title VipLeague -BlockExternalLinks True -AllowedScripts "schedule.bun,stream.bun,embedv3,jwplayer,hls.light" -AspectRatio 16:9.5

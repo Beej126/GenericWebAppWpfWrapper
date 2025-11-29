@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http; //needed for IHttpClientFactory, from Microsoft.Extensions.Http nuget package
 using System.Text;
+using System.Threading.Tasks;
+
 //using System.Linq;
 //using System.Security.Policy;
 using System.Windows;
@@ -30,9 +32,11 @@ namespace GenericWebAppWpfWrapper
         public readonly string StartUrl;
         public readonly bool SeparateUserData = false;
         public readonly bool AllowNewWindows = false;
-        public readonly bool BlockExternalLinks = false;
+        public readonly string[] AllowExternalHosts = null;
         public readonly string[] AllowedScripts = null;
         public readonly double? AspectRatio;
+
+        public string LoadedScriptId = null;
 
         public MainWindow(IConfiguration config, IHttpClientFactory httpClientFactory, IServiceProvider serviceProvider)
         {
@@ -41,7 +45,7 @@ namespace GenericWebAppWpfWrapper
             this.serviceProvider = serviceProvider;
 
             this.StartUrl = config["Url"];
-            this.Title = config["Title"] + "   ESC = minimize, F10 = topmost, F11 = full screen";
+            this.Title = config["Title"] + "   ESC = minimize, F5 = Refresh, F10 = topmost, F11 = full screen";
 
             string iconPath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".ico");
             if (File.Exists(iconPath)) this.Icon = new BitmapImage(new Uri(iconPath));
@@ -49,7 +53,7 @@ namespace GenericWebAppWpfWrapper
 
             _ = bool.TryParse(config["SeparateUserData"], out this.SeparateUserData);
             bool.TryParse(config["AllowNewWindows"], out this.AllowNewWindows);
-            bool.TryParse(config["BlockExternalLinks"], out this.BlockExternalLinks);
+            this.AllowExternalHosts = string.IsNullOrWhiteSpace(config["AllowExternalHosts"]) ? null : config["AllowExternalHosts"].Split(",");
             this.AllowedScripts = string.IsNullOrWhiteSpace(config["AllowedScripts"]) ? null : config["AllowedScripts"].Split(",");
             if (!string.IsNullOrEmpty(config["AspectRatio"])) this.AspectRatio = double.Parse(config["AspectRatio"].Split(":")[0]) / double.Parse(config["AspectRatio"].Split(":")[1]);
 
@@ -173,6 +177,25 @@ namespace GenericWebAppWpfWrapper
                         WindowState = WindowState.Minimized;
                         break;
 
+                    case Key.F5:
+                        var embeddedScriptFilePath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".js");
+                        if (File.Exists(embeddedScriptFilePath))
+                        {
+                            MessageBox.Show(LoadedScriptId);
+                            wv2.CoreWebView2.RemoveScriptToExecuteOnDocumentCreated(LoadedScriptId);
+
+                            _ = Task.Run(async () =>
+                            {
+                                var scriptId = await wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
+                                // Need to use Dispatcher to update UI thread variable
+                                _ = this.Dispatcher.InvokeAsync(() => { 
+                                    LoadedScriptId = scriptId;
+                                    MessageBox.Show(LoadedScriptId);
+                                });
+                            });
+                        }
+                        break;
+
                     // full screen mode
                     case Key.F11:
                         switch (WindowState)
@@ -232,7 +255,7 @@ namespace GenericWebAppWpfWrapper
         private string savedUserAgent;
         private void webView_Initialized(object wvInitSender, System.EventArgs e)
         {
-            wv2.CoreWebView2InitializationCompleted += (object sender, CoreWebView2InitializationCompletedEventArgs e) =>
+            wv2.CoreWebView2InitializationCompleted += async (object sender, CoreWebView2InitializationCompletedEventArgs e) =>
             {
 
                 //https://stackoverflow.com/questions/57479245/how-to-add-support-for-html5-notifications-in-xaml-webview-in-a-uwp-app/57503529#57503529
@@ -244,7 +267,10 @@ namespace GenericWebAppWpfWrapper
 
                 wv2.CoreWebView2.NavigationStarting += (object sender, CoreWebView2NavigationStartingEventArgs e) =>
                 {
-                    if (this.BlockExternalLinks && (new Uri(e.Uri)).Host != (new Uri(this.StartUrl)).Host)
+                    var requestedHost = (new Uri(e.Uri)).Host;
+                    if (requestedHost != (new Uri(this.StartUrl)).Host
+                        && (this.AllowExternalHosts != null && !this.AllowExternalHosts.Contains(requestedHost))
+                    )
                     {
                         e.Cancel = true;
                         return;
@@ -290,11 +316,14 @@ namespace GenericWebAppWpfWrapper
                         wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
                     }
 
-                    else if (this.BlockExternalLinks)
+                    else if (this.AllowExternalHosts != null)
                     {
                         //besides ignoring external links completely,
-                        //  the BlockExternalLinks flag also routes *internal* links back into the existing webview
-                        if (new Uri(newWindowArgs.Uri).Host == new Uri(this.StartUrl).Host)
+                        //  the AllowExternalHosts flag also routes *internal* links back into the existing webview
+                        var requestedHost = (new Uri(newWindowArgs.Uri)).Host;
+                        if (requestedHost == (new Uri(this.StartUrl)).Host
+                            || this.AllowExternalHosts.Contains(requestedHost)
+                        )
                             wv2.CoreWebView2.Navigate(newWindowArgs.Uri);
 
                         newWindowArgs.Handled = true;
@@ -361,7 +390,8 @@ namespace GenericWebAppWpfWrapper
                 //AddScriptToExecuteOnDocumentCreatedAsync fires on frames as well which gives us full power to override spammity spam vs just the main page
                 var embeddedScriptFilePath = Path.Combine(BasePath, config["Title"].Replace(" ", "") + ".js");
                 if (File.Exists(embeddedScriptFilePath))
-                    wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
+                    // With this corrected line:
+                    LoadedScriptId = await wv2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(embeddedScriptFilePath));
 
                 if (this.AllowedScripts != null)
                 {

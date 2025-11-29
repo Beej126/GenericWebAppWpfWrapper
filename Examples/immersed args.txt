@@ -1,0 +1,1 @@
+%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url discord.com/channels/428916969283125268/1200585787998220418 -Title Immersed
