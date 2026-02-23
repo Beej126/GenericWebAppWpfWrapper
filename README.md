@@ -20,7 +20,7 @@ there's a few "good citizen" user experiences i'm looking for that don't come wi
 1. appname (e.g. Gmail) - this correlates to:
     - the main window title
     - pulling appname.ico for the running taskbar icon
-    - loading appname.js as custom script that executes inside of every web page loaded by the initial url. one primary usage pattern is scraping the web pages for message counts (which get displayed as the Windows Taskbar icon's "badge"). but this also faciliates all kinds of "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)" hacking, like changing or eliminating page content (see vipleague.js for examples, although now parm #5, blocking scripts, has eliminated the need for me in this case)
+    - loading appname.js as custom script that executes inside of every web page loaded by the initial url. one primary usage pattern is scraping the web pages for message counts (which get displayed as the Windows Taskbar icon's "badge"). but this also faciliates all kinds of "[Greasemonkey](https://en.wikipedia.org/wiki/Greasemonkey)" hacking, like changing or eliminating page content.
     <div style="margin-left: -3em">---------- the rest are optional ------</div>
 1. True/False - [Default: False] True = separate folder for application storage, cookies, etc.
 1. True/False - [Default: False] True = block all external link nav (good for disabling sites that are riddled with click jacking)
@@ -28,7 +28,7 @@ there's a few "good citizen" user experiences i'm looking for that don't come wi
 1. x:y - forced window aspect ratio. decimals allowed (e.g. 16:9.5 somehow worked best for a video site)
  
   example command line:<br/>
-  `path\GenericWebAppWpfWrapper.exe https://vipleague.im/american-football-schedule-streaming-links "VipLeague" False True "embed2.min.js" 16:9.5`
+  `%bin%\GenericWebAppWpfWrapper\bin\GenericWebAppWpfWrapper.exe -Url mail.google.com -Title Gmail`
 </div>
 
   lastly, set the "Start in:" of the shortcut to the directory those ico and js files are in
